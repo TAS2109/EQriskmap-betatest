@@ -557,7 +557,7 @@ def _fetch_geonet_tec(dt: datetime) -> dict | None:
         for j, lon in enumerate(lon_arr):
             dists = np.sqrt((lats - lat)**2 + (lons - lon)**2)
             dists = np.maximum(dists, 0.01)
-            weights = 1.0 / dists**2
+            weights = 1.0 / (dists + 0.2)**1.3
             tec_grid[i, j] = np.sum(weights * stecs) / np.sum(weights)
 
     # ── 過去7日間の同時刻帯でZスコア計算 ──
@@ -603,7 +603,7 @@ def _fetch_geonet_tec(dt: datetime) -> dict | None:
         for i, lat in enumerate(lat_arr):
             for j, lon in enumerate(lon_arr):
                 dists   = np.maximum(np.sqrt((pl-lat)**2 + (po-lon)**2), 0.01)
-                weights = 1.0 / dists**2
+                weights = 1.0 / (dists + 0.2)**1.3
                 pg[i, j] = np.sum(weights * ps) / np.sum(weights)
         history_stack.append(pg)
 
