@@ -1205,14 +1205,14 @@ def _percentile_thresholds(values_arr):
       Level 4: ETAS >= 50
       Level 3: ETAS >= 0.1
       Level 2: ETAS >= 0.051
-      Level 1: ETAS >= 0.050
+      Level 1: ETAS >= 0.0501
     """
     return (
         math.log(5000 + 1),    # Level 5
         math.log(50+ 1),     # Level 4
         math.log(0.1 + 1),     # Level 3
         math.log(0.051 + 1),   # Level 2
-        math.log(0.050 + 1),  # Level 1
+        math.log(0.0501 + 1),  # Level 1
     )
 
 ETAS_COLOR = {5: "#1a0033", 4: "#8000ff", 3: "red", 2: "orange", 1: "#66ccff"}
@@ -1261,7 +1261,7 @@ def create_etas_map(grid_scores, quakes, updated_str):
       <span style="color:#8000ff;">&#9632;</span> Level 4（ETAS≥50）<br>
       <span style="color:red;">&#9632;</span> Level 3（ETAS≥0.1）<br>
       <span style="color:orange;">&#9632;</span> Level 2（ETAS≥0.051）<br>
-      <span style="color:#66ccff;">&#9632;</span> Level 1（ETAS≥0.050）<br>
+      <span style="color:#66ccff;">&#9632;</span> Level 1（ETAS≥0.0501）<br>
       <hr style="margin:4px 0;">
       <small>空間: べき乗則(q={EP.Q}) / 時間: Omori-Utsu(p={EP.P})<br>
       深さ補正あり / 背景活動率={EP.MU}<br>
