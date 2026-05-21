@@ -63,9 +63,9 @@ class ETASParams:
     P           = 1.11
     ALPHA       = 2.30
     M0          = 1.0
-    D           = 0.015
+    D           = 100
     GAMMA       = 0.50
-    Q           = 1.58
+    Q           = 1.0
     DEPTH_SCALE = 80.0
     SPACE_RADIUS = 8
 
