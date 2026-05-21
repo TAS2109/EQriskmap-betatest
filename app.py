@@ -557,7 +557,7 @@ def _fetch_geonet_tec(dt: datetime) -> dict | None:
         for j, lon in enumerate(lon_arr):
             dists = np.sqrt((lats - lat)**2 + (lons - lon)**2)
             dists = np.maximum(dists, 0.01)
-            weights = 1.0 / (dists + 0.2)**1.3
+            weights = 1.0 / dists**2
             tec_grid[i, j] = np.sum(weights * stecs) / np.sum(weights)
 
     # ── 過去7日間の同時刻帯でZスコア計算 ──
@@ -603,7 +603,7 @@ def _fetch_geonet_tec(dt: datetime) -> dict | None:
         for i, lat in enumerate(lat_arr):
             for j, lon in enumerate(lon_arr):
                 dists   = np.maximum(np.sqrt((pl-lat)**2 + (po-lon)**2), 0.01)
-                weights = 1.0 / (dists + 0.2)**1.3
+                weights = 1.0 / dists**2
                 pg[i, j] = np.sum(weights * ps) / np.sum(weights)
         history_stack.append(pg)
 
@@ -1200,19 +1200,20 @@ def analyze_etas(quakes):
 # ══════════════════════════════════════════════════════
 def _percentile_thresholds(values_arr):
     """
-    固定ETAS閾値
-      Level 5: ETAS >= 5000
-      Level 4: ETAS >= 50
-      Level 3: ETAS >= 0.1
-      Level 2: ETAS >= 0.051
-      Level 1: ETAS >= 0.0501
+    レベル閾値（パーセンタイルベース）
+      Level 5: 上位 0.2% （M6相当以上）
+      Level 4: 上位 1.5% （M5.5相当以上）
+      Level 3: 上位 5.0% （M5前後相当）
+      Level 2: 上位 15%  （現状維持）
+      Level 1: 上位 50%  （現状維持）
     """
+    log_v = np.log(np.clip(values_arr, 0, None) + 1)
     return (
-        math.log(5000 + 1),    # Level 5
-        math.log(50+ 1),     # Level 4
-        math.log(0.1 + 1),     # Level 3
-        math.log(0.051 + 1),   # Level 2
-        math.log(0.0501 + 1),  # Level 1
+        np.percentile(log_v, 99.8),   # Level 5
+        np.percentile(log_v, 98.5),   # Level 4
+        np.percentile(log_v, 95.0),   # Level 3
+        np.percentile(log_v, 85.0),   # Level 2
+        np.percentile(log_v, 50.0),   # Level 1
     )
 
 ETAS_COLOR = {5: "#1a0033", 4: "#8000ff", 3: "red", 2: "orange", 1: "#66ccff"}
@@ -1257,11 +1258,11 @@ def create_etas_map(grid_scores, quakes, updated_str):
                 background:white;padding:12px;border-radius:8px;
                 border:2px solid #8800cc;font-size:13px;line-height:2.0;">
       <b>&#9312; ETAS 地震発生確率</b><br>
-      <span style="color:#1a0033;">&#9632;</span> Level 5（ETAS≥5000）<br>
-      <span style="color:#8000ff;">&#9632;</span> Level 4（ETAS≥50）<br>
-      <span style="color:red;">&#9632;</span> Level 3（ETAS≥0.1）<br>
-      <span style="color:orange;">&#9632;</span> Level 2（ETAS≥0.051）<br>
-      <span style="color:#66ccff;">&#9632;</span> Level 1（ETAS≥0.0501）<br>
+      <span style="color:#1a0033;">&#9632;</span> Level 5（上位0.2%）<br>
+      <span style="color:#8000ff;">&#9632;</span> Level 4（上位1.5%）<br>
+      <span style="color:red;">&#9632;</span> Level 3（上位5.0%）<br>
+      <span style="color:orange;">&#9632;</span> Level 2（上位15%）<br>
+      <span style="color:#66ccff;">&#9632;</span> Level 1（上位50%）<br>
       <hr style="margin:4px 0;">
       <small>空間: べき乗則(q={EP.Q}) / 時間: Omori-Utsu(p={EP.P})<br>
       深さ補正あり / 背景活動率={EP.MU}<br>
@@ -1453,7 +1454,7 @@ def create_combined_map(grid_scores, tec_result, quakes, updated_str):
                 background:white;padding:12px;border-radius:8px;
                 border:2px solid #660099;font-size:13px;line-height:2.0;">
       <b>&#9314; 統合リスクマップ</b><br>
-      <span style="color:#0d001a;">&#9632;</span> Level 5（ETAS≥5000）<br>
+      <span style="color:#0d001a;">&#9632;</span> Level 5（上位0.2%）<br>
       <span style="color:#660099;">&#9632;</span> Level 4（上位0.5%）<br>
       <span style="color:#cc0033;">&#9632;</span> Level 3（上位1%）<br>
       <span style="color:#ff6600;">&#9632;</span> Level 2（上位30%）<br>
